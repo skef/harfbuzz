@@ -572,6 +572,13 @@ bool OT::cff1::accelerator_t::get_path (hb_font_t *font, hb_codepoint_t glyph, h
   return _get_path (this, font, glyph, draw_session);
 }
 
+bool OT::cff1::accelerator_t::get_cff_charstrings_offset(hb_font_t *font, int *offset) const
+{
+  if (offset != NULL)
+    *offset = topDict.charStringsOffset;
+  return true;
+}
+
 struct get_seac_param_t
 {
   get_seac_param_t (const OT::cff1::accelerator_t *_cff) : cff (_cff) {}

@@ -433,6 +433,8 @@ struct cff2_subset_plan
     pinned = (bool) plan->normalized_coords;
     desubroutinize = plan->flags & HB_SUBSET_FLAGS_DESUBROUTINIZE ||
 		     pinned; // For instancing we need this path
+    charstrings_last = plan->flags & HB_SUBSET_FLAGS_IFTB_REQUIREMENTS;
+    min_charstrings_off_size = (plan->flags & HB_SUBSET_FLAGS_IFTB_REQUIREMENTS) ? 4 : 0;
 
     if (desubroutinize)
     {
@@ -504,7 +506,35 @@ struct cff2_subset_plan
 
   bool	    drop_hints = false;
   bool	    desubroutinize = false;
+  bool	    charstrings_last = false;
+
+  unsigned  min_charstrings_off_size = 0;
 };
+
+static bool _serialize_cff2_charstrings (hb_serialize_context_t *c,
+			     cff2_subset_plan &plan,
+			     const OT::cff2::accelerator_subset_t  &acc)
+{
+  {
+    c->push ();
+
+    unsigned total_size = CFF2CharStrings::total_size (plan.subset_charstrings, plan.min_charstrings_off_size);
+    if (unlikely (!c->start_zerocopy (total_size)))
+       return false;
+
+    CFF2CharStrings  *cs = c->start_embed<CFF2CharStrings> ();
+    if (unlikely (!cs)) return false;
+
+    if (likely (cs->serialize (c, plan.subset_charstrings, plan.min_charstrings_off_size)))
+      plan.info.char_strings_link = c->pop_pack (false);
+    else
+    {
+      c->pop_discard ();
+      return false;
+    }
+  }
+  return true;
+}
 
 static bool _serialize_cff2 (hb_serialize_context_t *c,
 			     cff2_subset_plan &plan,
@@ -512,6 +542,11 @@ static bool _serialize_cff2 (hb_serialize_context_t *c,
 			     unsigned int num_glyphs,
 			     hb_array_t<int> normalized_coords)
 {
+  if (plan.charstrings_last) {
+    if (!_serialize_cff2_charstrings(c, plan, acc))
+      return false;
+  }
+
   /* private dicts & local subrs */
   hb_vector_t<table_info_t>  private_dict_infos;
   if (unlikely (!private_dict_infos.resize (plan.subset_fdcount))) return false;
@@ -554,24 +589,9 @@ static bool _serialize_cff2 (hb_serialize_context_t *c,
     }
   }
 
-  /* CharStrings */
-  {
-    c->push ();
-
-    unsigned total_size = CFF2CharStrings::total_size (plan.subset_charstrings);
-    if (unlikely (!c->start_zerocopy (total_size)))
-       return false;
-
-    CFF2CharStrings  *cs = c->start_embed<CFF2CharStrings> ();
-    if (unlikely (!cs)) return false;
-
-    if (likely (cs->serialize (c, plan.subset_charstrings)))
-      plan.info.char_strings_link = c->pop_pack (false);
-    else
-    {
-      c->pop_discard ();
+  if (!plan.charstrings_last) {
+    if (!_serialize_cff2_charstrings(c, plan, acc))
       return false;
-    }
   }
 
   /* FDSelect */

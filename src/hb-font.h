@@ -545,6 +545,22 @@ typedef void (*hb_font_paint_glyph_func_t) (hb_font_t *font, void *font_data,
                                             hb_color_t foreground,
                                             void *user_data);
 
+/**
+ * hb_font_get_cff_charstrings_offset_func_t:
+ * @font: #hb_font_t to work on
+ * @font_data: @font user data pointer
+ *
+ * A virtual method for the #hb_font_funcs_t of an #hb_font_t object.
+ *
+ * Return value: A pointer to the glyf, CFF, or CFF2 glyph content
+ *
+ * Since: REPLACEME
+ */
+
+typedef int (*hb_font_get_cff_charstrings_offset_func_t) (hb_font_t *font,
+                                                          void *font_data,
+                                                          void *user_data);
+
 /* func setters */
 
 /**
@@ -854,6 +870,23 @@ hb_font_funcs_set_paint_glyph_func (hb_font_funcs_t *ffuncs,
                                     hb_font_paint_glyph_func_t func,
                                     void *user_data, hb_destroy_func_t destroy);
 
+/**
+ * hb_font_funcs_set_cff_charstrings_offset_func:
+ * @ffuncs: A font-function structure
+ * @func: (closure user_data) (destroy destroy) (scope notified): The callback function to assign
+ * @user_data: Data to pass to @func
+ * @destroy: (nullable): The function to call when @user_data is not longer needed
+ *
+ * Sets the implementation function for #hb_font_get_cff_charstrings_offset.
+ *
+ * Since: REPLACEME
+ */
+
+HB_EXTERN void
+hb_font_funcs_set_cff_charstrings_offset_func (hb_font_funcs_t *ffuncs,
+                                               hb_font_get_cff_charstrings_offset_func_t func,
+                                               void *user_data, hb_destroy_func_t destroy);
+
 /* func dispatch */
 
 HB_EXTERN hb_bool_t
@@ -950,6 +983,9 @@ hb_font_paint_glyph (hb_font_t *font,
                      hb_paint_funcs_t *pfuncs, void *paint_data,
                      unsigned int palette_index,
                      hb_color_t foreground);
+
+HB_EXTERN int
+hb_font_get_cff_charstrings_offset(hb_font_t *font);
 
 /* high-level funcs, with fallback */
 

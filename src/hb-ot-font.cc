@@ -553,6 +553,20 @@ hb_ot_paint_glyph (hb_font_t *font,
 }
 #endif
 
+static int
+hb_ot_get_cff_charstrings_offset(hb_font_t *font,
+                                 void *font_data,
+                                 void *user_data)
+{
+  int r = -1;
+  const hb_ot_font_t *ot_font = (const hb_ot_font_t *) font_data;
+  const hb_ot_face_t *ot_face = ot_font->ot_face;
+
+  if (ot_face->cff1->get_cff_charstrings_offset(font, &r)) return r;
+  else if (ot_face->cff2->get_cff_charstrings_offset(font, &r)) return r;
+  else return -1;
+}
+
 static inline void free_static_ot_funcs ();
 
 static struct hb_ot_font_funcs_lazy_loader_t : hb_font_funcs_lazy_loader_t<hb_ot_font_funcs_lazy_loader_t>
@@ -582,6 +596,8 @@ static struct hb_ot_font_funcs_lazy_loader_t : hb_font_funcs_lazy_loader_t<hb_ot
 #ifndef HB_NO_PAINT
     hb_font_funcs_set_paint_glyph_func (funcs, hb_ot_paint_glyph, nullptr, nullptr);
 #endif
+
+    hb_font_funcs_set_cff_charstrings_offset_func (funcs, hb_ot_get_cff_charstrings_offset, nullptr, nullptr);
 
     hb_font_funcs_set_glyph_extents_func (funcs, hb_ot_get_glyph_extents, nullptr, nullptr);
     //hb_font_funcs_set_glyph_contour_point_func (funcs, hb_ot_get_glyph_contour_point, nullptr, nullptr);

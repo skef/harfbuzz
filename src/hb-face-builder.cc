@@ -48,6 +48,7 @@ struct face_table_info_t
 struct hb_face_builder_data_t
 {
   hb_hashmap_t<hb_tag_t, face_table_info_t> tables;
+  hb_tag_t type;
 };
 
 static int compare_entries (const void* pa, const void* pb)
@@ -74,6 +75,7 @@ _hb_face_builder_data_create ()
     return nullptr;
 
   data->tables.init ();
+  data->type = 0;
 
   return data;
 }
@@ -111,7 +113,11 @@ _hb_face_builder_data_reference_blob (hb_face_builder_data_t *data)
 
   bool is_cff = (data->tables.has (HB_TAG ('C','F','F',' '))
                  || data->tables.has (HB_TAG ('C','F','F','2')));
-  hb_tag_t sfnt_tag = is_cff ? OT::OpenTypeFontFile::CFFTag : OT::OpenTypeFontFile::TrueTypeTag;
+  hb_tag_t sfnt_tag;
+  if (data->type != 0)
+    sfnt_tag = data->type;
+  else
+    sfnt_tag = is_cff ? OT::OpenTypeFontFile::CFFTag : OT::OpenTypeFontFile::TrueTypeTag;
 
   // Sort the tags so that produced face is deterministic.
   hb_vector_t<hb_pair_t <hb_tag_t, face_table_info_t>> sorted_entries;
@@ -243,4 +249,19 @@ hb_face_builder_sort_tables (hb_face_t *face,
     if (!data->tables.has (*tag, &info)) continue;
     info->order = order++;
   }
+}
+
+/**
+ * hb_face_builder_set_font_type:
+ * @face: A face object created with hb_face_builder_create()
+ * @type: A tag to put at the start of the file.
+ *
+ * Since: REPLACEME
+ **/
+void
+hb_face_builder_set_font_type (hb_face_t *face,
+                               hb_tag_t type)
+{
+  hb_face_builder_data_t *data = (hb_face_builder_data_t *) face->user_data;
+  data->type = type;
 }

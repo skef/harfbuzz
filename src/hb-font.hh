@@ -59,6 +59,7 @@
   HB_FONT_FUNC_IMPLEMENT (get_,glyph_from_name) \
   HB_FONT_FUNC_IMPLEMENT (,draw_glyph) \
   HB_FONT_FUNC_IMPLEMENT (,paint_glyph) \
+  HB_FONT_FUNC_IMPLEMENT (get_,cff_charstrings_offset) \
   /* ^--- Add new callbacks here */
 
 struct hb_font_funcs_t
@@ -445,6 +446,12 @@ struct hb_font_t
                               paint_funcs, paint_data,
                               palette, foreground,
                               !klass->user_data ? nullptr : klass->user_data->paint_glyph);
+  }
+
+  int get_cff_charstrings_offset()
+  {
+    return klass->get.f.cff_charstrings_offset(this, user_data,
+                                               !klass->user_data ? nullptr : klass->user_data->cff_charstrings_offset);
   }
 
   /* A bit higher-level, and with fallback */

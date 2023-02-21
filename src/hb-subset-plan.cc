@@ -869,7 +869,7 @@ hb_subset_plan_t::hb_subset_plan_t (hb_face_t *face,
   void* accel = hb_face_get_user_data(face, hb_subset_accelerator_t::user_data_key());
 
   attach_accelerator_data = input->attach_accelerator_data;
-  force_long_loca = input->force_long_loca;
+  force_long_loca = input->force_long_loca || (flags & HB_SUBSET_FLAGS_IFTB_REQUIREMENTS);
   if (accel)
     accelerator = (hb_subset_accelerator_t*) accel;
 

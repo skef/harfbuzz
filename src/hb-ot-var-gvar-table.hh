@@ -139,7 +139,7 @@ struct gvar
       subset_data_size += get_glyph_var_data_bytes (c->source_blob, glyph_count, old_gid).length;
     }
 
-    bool long_offset = subset_data_size & ~0xFFFFu;
+    bool long_offset = (subset_data_size & ~0xFFFFu) || (c->plan->flags & HB_SUBSET_FLAGS_IFTB_REQUIREMENTS);
     out->flags = long_offset ? 1 : 0;
 
     HBUINT8 *subset_offsets = c->serializer->allocate_size<HBUINT8> ((long_offset ? 4 : 2) * (num_glyphs + 1));
@@ -157,6 +157,8 @@ struct gvar
       hb_memcpy (tuples, this+sharedTuples, shared_tuple_size);
     }
 
+    /* This ordering relative to the shared tuples array, which puts the glyphVariationData
+       last in the table, is required when HB_SUBSET_FLAGS_IFTB_REQUIREMENTS is set */
     char *subset_data = c->serializer->allocate_size<char> (subset_data_size);
     if (!subset_data) return_trace (false);
     out->dataZ = subset_data - (char *) out;

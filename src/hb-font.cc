@@ -525,6 +525,14 @@ hb_font_paint_glyph_nil (hb_font_t *font HB_UNUSED,
 {
 }
 
+static int
+hb_font_get_cff_charstrings_offset_nil(hb_font_t *font HB_UNUSED,
+                                       void *font_data HB_UNUSED,
+                                       void *user_data HB_UNUSED)
+{
+    return -1;
+}
+
 typedef struct hb_font_draw_glyph_default_adaptor_t {
   hb_draw_funcs_t *draw_funcs;
   void		  *draw_data;
@@ -672,6 +680,14 @@ hb_font_paint_glyph_default (hb_font_t *font,
   font->parent->paint_glyph (glyph, paint_funcs, paint_data, palette, foreground);
 
   paint_funcs->pop_transform (paint_data);
+}
+
+static int
+hb_font_get_cff_charstrings_offset_default(hb_font_t *font,
+                                           void *font_data,
+                                           void *user_data)
+{
+  return font->parent->get_cff_charstrings_offset();
 }
 
 DEFINE_NULL_INSTANCE (hb_font_funcs_t) =
@@ -1457,6 +1473,11 @@ hb_font_paint_glyph (hb_font_t *font,
                      hb_color_t foreground)
 {
   font->paint_glyph (glyph, pfuncs, paint_data, palette_index, foreground);
+}
+
+int
+hb_font_get_cff_charstrings_offset(hb_font_t *font) {
+  return font->get_cff_charstrings_offset();
 }
 
 /* A bit higher-level, and with fallback */

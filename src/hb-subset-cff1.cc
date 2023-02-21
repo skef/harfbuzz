@@ -563,6 +563,8 @@ struct cff_subset_plan {
     orig_fdcount = acc.fdCount;
     drop_hints = plan->flags & HB_SUBSET_FLAGS_NO_HINTING;
     desubroutinize = plan->flags & HB_SUBSET_FLAGS_DESUBROUTINIZE;
+    charstrings_last = plan->flags & HB_SUBSET_FLAGS_IFTB_REQUIREMENTS;
+    min_charstrings_off_size = (plan->flags & HB_SUBSET_FLAGS_IFTB_REQUIREMENTS) ? 4 : 0;
 
     /* check whether the subset renumbers any glyph IDs */
     gid_renum = false;
@@ -721,13 +723,46 @@ struct cff_subset_plan {
   unsigned int	topDictModSIDs[name_dict_values_t::ValCount];
 
   bool		desubroutinize = false;
+  bool		charstrings_last = false;
+
+  unsigned	min_charstrings_off_size = 0;
 };
+
+static bool _serialize_cff1_charstrings (hb_serialize_context_t *c,
+			     cff_subset_plan &plan,
+			     const OT::cff1::accelerator_subset_t  &acc)
+{
+  {
+    c->push<CFF1CharStrings> ();
+
+    unsigned total_size = CFF1CharStrings::total_size (plan.subset_charstrings, plan.min_charstrings_off_size);
+    if (unlikely (!c->start_zerocopy (total_size)))
+       return false;
+
+    CFF1CharStrings  *cs = c->start_embed<CFF1CharStrings> ();
+    if (unlikely (!cs)) return false;
+
+    if (likely (cs->serialize (c, plan.subset_charstrings, plan.min_charstrings_off_size)))
+      plan.info.char_strings_link = c->pop_pack (false);
+    else
+    {
+      c->pop_discard ();
+      return false;
+    }
+  }
+  return true;
+}
 
 static bool _serialize_cff1 (hb_serialize_context_t *c,
 			     cff_subset_plan &plan,
 			     const OT::cff1::accelerator_subset_t  &acc,
 			     unsigned int num_glyphs)
 {
+  if (plan.charstrings_last) {
+    if (!_serialize_cff1_charstrings(c, plan, acc))
+      return false;
+  }
+
   /* private dicts & local subrs */
   for (int i = (int)acc.privateDicts.length; --i >= 0 ;)
   {
@@ -770,24 +805,9 @@ static bool _serialize_cff1 (hb_serialize_context_t *c,
   if (!acc.is_CID ())
     plan.info.privateDictInfo = plan.fontdicts_mod[0].privateDictInfo;
 
-  /* CharStrings */
-  {
-    c->push<CFF1CharStrings> ();
-
-    unsigned total_size = CFF1CharStrings::total_size (plan.subset_charstrings);
-    if (unlikely (!c->start_zerocopy (total_size)))
-       return false;
-
-    CFF1CharStrings  *cs = c->start_embed<CFF1CharStrings> ();
-    if (unlikely (!cs)) return false;
-
-    if (likely (cs->serialize (c, plan.subset_charstrings)))
-      plan.info.char_strings_link = c->pop_pack (false);
-    else
-    {
-      c->pop_discard ();
+  if (!plan.charstrings_last) {
+    if (!_serialize_cff1_charstrings(c, plan, acc))
       return false;
-    }
   }
 
   /* FDArray (FD Index) */

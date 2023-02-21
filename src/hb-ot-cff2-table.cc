@@ -152,6 +152,13 @@ bool OT::cff2::accelerator_t::paint_glyph (hb_font_t *font, hb_codepoint_t glyph
   return true;
 }
 
+bool OT::cff2::accelerator_t::get_cff_charstrings_offset(hb_font_t *font, int *offset) const
+{
+  if (offset != NULL)
+    *offset = topDict.charStringsOffset;
+  return true;
+}
+
 struct cff2_path_param_t
 {
   cff2_path_param_t (hb_font_t *font_, hb_draw_session_t &draw_session_)

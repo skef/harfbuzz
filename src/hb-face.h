@@ -181,6 +181,9 @@ HB_EXTERN void
 hb_face_builder_sort_tables (hb_face_t *face,
                              const hb_tag_t  *tags);
 
+HB_EXTERN void
+hb_face_builder_set_font_type (hb_face_t *face,
+                               hb_tag_t type);
 
 HB_END_DECLS
 
