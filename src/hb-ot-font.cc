@@ -559,12 +559,11 @@ hb_ot_get_cff_charstrings_offset(hb_font_t *font,
                                  void *user_data)
 {
   int r = -1;
-  const hb_ot_font_t *ot_font = (const hb_ot_font_t *) font_data;
-  const hb_ot_face_t *ot_face = ot_font->ot_face;
-
-  if (ot_face->cff1->get_cff_charstrings_offset(font, &r)) return r;
-  else if (ot_face->cff2->get_cff_charstrings_offset(font, &r)) return r;
-  else return -1;
+#ifndef HB_NO_OT_FONT_CFF
+  if (font->face->table.cff1->get_cff_charstrings_offset(font, &r)) return r;
+  else if (font->face->table.cff2->get_cff_charstrings_offset(font, &r)) return r;
+#endif
+  return r;
 }
 
 static inline void free_static_ot_funcs ();

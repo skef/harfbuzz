@@ -154,6 +154,14 @@ bool OT::cff2::accelerator_t::paint_glyph (hb_font_t *font, hb_codepoint_t glyph
 
 bool OT::cff2::accelerator_t::get_cff_charstrings_offset(hb_font_t *font, int *offset) const
 {
+#ifdef HB_NO_OT_FONT_CFF
+  /* XXX Remove check when this code moves to .hh file. */
+  return true;
+#endif
+
+  if (topDict.charStringsOffset == 0)
+      return false;
+
   if (offset != NULL)
     *offset = topDict.charStringsOffset;
   return true;
