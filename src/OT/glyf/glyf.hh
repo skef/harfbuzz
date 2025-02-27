@@ -527,6 +527,8 @@ struct glyf_accelerator_t
 		       scratch);
   }
 
+  unsigned int get_num_glyphs () const { return num_glyphs; }
+
 #ifndef HB_NO_VAR
   const gvar_accelerator_t *gvar;
 #ifndef HB_NO_BEYOND_64K
