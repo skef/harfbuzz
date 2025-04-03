@@ -2389,6 +2389,7 @@ struct COLR
     hb_atomic_t<hb_colr_scratch_t *> cached_scratch;
   };
 
+#ifdef HB_DEPEND_API
   void depend (hb_depend_data_t *depend_data) const
   {
     // v0
@@ -2413,6 +2414,7 @@ struct COLR
       paint.dispatch (&c);
     }
   }
+#endif
 
   void closure_glyphs (hb_codepoint_t glyph,
 		       hb_set_t *related_ids /* OUT */) const
