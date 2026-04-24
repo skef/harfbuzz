@@ -220,7 +220,7 @@ struct hb_colrv1_closure_context_t :
   {}
 };
 
-#ifdef HB_DEPEND_API 
+#ifndef HB_NO_SUBSET_DEPEND 
 
 struct hb_colrv1_depend_context_t :
        hb_dispatch_context_t<hb_colrv1_depend_context_t, bool>
@@ -256,7 +256,7 @@ struct hb_colrv1_depend_context_t :
                           source_gid (0)
   {}
 };
-#endif /* HB_DEPEND_API */
+#endif /* !HB_NO_SUBSET_DEPEND */
 
 struct LayerRecord
 {
@@ -319,7 +319,7 @@ struct Variable
     return_trace (c->embed (this));
   }
 
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   void dependv1 (hb_colrv1_depend_context_t* c) const
   { value.dependv1 (c); }
 #endif
@@ -399,7 +399,7 @@ struct NoVariable
     return_trace (c->embed (this));
   }
 
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   void dependv1 (hb_colrv1_depend_context_t* c) const
   { value.dependv1 (c); }
 #endif
@@ -447,7 +447,7 @@ struct NoVariable
 
 struct ColorStop
 {
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   void dependv1 (hb_colrv1_depend_context_t * c) const {}
 #endif
 
@@ -513,7 +513,7 @@ struct Extend : HBUINT8
 template <template<typename> class Var>
 struct ColorLine
 {
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   void dependv1 (hb_colrv1_depend_context_t * c) const
   {
     for (const auto &stop : stops.iter ())
@@ -666,7 +666,7 @@ struct Affine2x3
     return_trace (c->check_struct (this));
   }
 
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   void dependv1 (hb_colrv1_depend_context_t* c) const {}
 #endif
 
@@ -716,7 +716,7 @@ struct Affine2x3
 
 struct PaintColrLayers
 {
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   void dependv1 (hb_colrv1_depend_context_t* c) const;
 #endif
   void closurev1 (hb_colrv1_closure_context_t* c) const;
@@ -750,7 +750,7 @@ struct PaintColrLayers
 
 struct PaintSolid
 {
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   void dependv1 (hb_colrv1_depend_context_t* c) const {}
 #endif
   void closurev1 (hb_colrv1_closure_context_t* c) const
@@ -805,7 +805,7 @@ struct PaintSolid
 template <template<typename> class Var>
 struct PaintLinearGradient
 {
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   void dependv1 (hb_colrv1_depend_context_t* c) const
   {
     (this+colorLine).dependv1 (c);
@@ -882,7 +882,7 @@ struct PaintLinearGradient
 template <template<typename> class Var>
 struct PaintRadialGradient
 {
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   void dependv1 (hb_colrv1_depend_context_t* c) const
   {
     (this+colorLine).dependv1 (c);
@@ -959,7 +959,7 @@ struct PaintRadialGradient
 template <template<typename> class Var>
 struct PaintSweepGradient
 {
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   void dependv1 (hb_colrv1_depend_context_t* c) const
   {
     (this+colorLine).dependv1 (c);
@@ -1030,7 +1030,7 @@ struct PaintSweepGradient
 // Paint a non-COLR glyph, filled as indicated by paint.
 struct PaintGlyph
 {
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   void dependv1 (hb_colrv1_depend_context_t* c) const;
 #endif
   void closurev1 (hb_colrv1_closure_context_t* c) const;
@@ -1076,7 +1076,7 @@ struct PaintGlyph
 
 struct PaintColrGlyph
 {
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   void dependv1 (hb_colrv1_depend_context_t* c) const;
 #endif
   void closurev1 (hb_colrv1_closure_context_t* c) const;
@@ -1109,7 +1109,7 @@ struct PaintColrGlyph
 template <template<typename> class Var>
 struct PaintTransform
 {
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   HB_INTERNAL void dependv1 (hb_colrv1_depend_context_t* c) const;
 #endif
   HB_INTERNAL void closurev1 (hb_colrv1_closure_context_t* c) const;
@@ -1151,7 +1151,7 @@ struct PaintTransform
 
 struct PaintTranslate
 {
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   HB_INTERNAL void dependv1 (hb_colrv1_depend_context_t* c) const;
 #endif
   HB_INTERNAL void closurev1 (hb_colrv1_closure_context_t* c) const;
@@ -1203,7 +1203,7 @@ struct PaintTranslate
 
 struct PaintScale
 {
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   HB_INTERNAL void dependv1 (hb_colrv1_depend_context_t* c) const;
 #endif
   HB_INTERNAL void closurev1 (hb_colrv1_closure_context_t* c) const;
@@ -1255,7 +1255,7 @@ struct PaintScale
 
 struct PaintScaleAroundCenter
 {
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   HB_INTERNAL void dependv1 (hb_colrv1_depend_context_t* c) const;
 #endif
   HB_INTERNAL void closurev1 (hb_colrv1_closure_context_t* c) const;
@@ -1313,7 +1313,7 @@ struct PaintScaleAroundCenter
 
 struct PaintScaleUniform
 {
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   HB_INTERNAL void dependv1 (hb_colrv1_depend_context_t* c) const;
 #endif
   HB_INTERNAL void closurev1 (hb_colrv1_closure_context_t* c) const;
@@ -1360,7 +1360,7 @@ struct PaintScaleUniform
 
 struct PaintScaleUniformAroundCenter
 {
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   HB_INTERNAL void dependv1 (hb_colrv1_depend_context_t* c) const;
 #endif
   HB_INTERNAL void closurev1 (hb_colrv1_closure_context_t* c) const;
@@ -1415,7 +1415,7 @@ struct PaintScaleUniformAroundCenter
 
 struct PaintRotate
 {
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   HB_INTERNAL void dependv1 (hb_colrv1_depend_context_t* c) const;
 #endif
   HB_INTERNAL void closurev1 (hb_colrv1_closure_context_t* c) const;
@@ -1462,7 +1462,7 @@ struct PaintRotate
 
 struct PaintRotateAroundCenter
 {
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   HB_INTERNAL void dependv1 (hb_colrv1_depend_context_t* c) const;
 #endif
   HB_INTERNAL void closurev1 (hb_colrv1_closure_context_t* c) const;
@@ -1517,7 +1517,7 @@ struct PaintRotateAroundCenter
 
 struct PaintSkew
 {
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   HB_INTERNAL void dependv1 (hb_colrv1_depend_context_t* c) const;
 #endif
   HB_INTERNAL void closurev1 (hb_colrv1_closure_context_t* c) const;
@@ -1569,7 +1569,7 @@ struct PaintSkew
 
 struct PaintSkewAroundCenter
 {
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   HB_INTERNAL void dependv1 (hb_colrv1_depend_context_t* c) const;
 #endif
   HB_INTERNAL void closurev1 (hb_colrv1_closure_context_t* c) const;
@@ -1627,7 +1627,7 @@ struct PaintSkewAroundCenter
 
 struct PaintComposite
 {
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   void dependv1 (hb_colrv1_depend_context_t* c) const;
 #endif
   void closurev1 (hb_colrv1_closure_context_t* c) const;
@@ -1740,7 +1740,7 @@ struct ClipBoxFormat2 : Variable<ClipBoxFormat1>
     }
   }
 
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   void dependv1 (hb_colrv1_depend_context_t* c) const;
 #endif
   void closurev1 (hb_colrv1_closure_context_t* c) const
@@ -1760,7 +1760,7 @@ struct ClipBox
     }
   }
 
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   void dependv1 (hb_colrv1_depend_context_t* c) const
   {
     switch (u.format.v) {
@@ -1825,7 +1825,7 @@ struct ClipRecord
   int cmp (hb_codepoint_t g) const
   { return g < startGlyphID ? -1 : g <= endGlyphID ? 0 : +1; }
 
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   void dependv1 (hb_colrv1_depend_context_t* c, const void *base) const
   {
     (base+clipBox).dependv1 (c);
@@ -2329,7 +2329,7 @@ struct COLR
 
     bool is_valid () { return colr.get_blob ()->length; }
 
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
     void depend (hb_depend_data_t *depend_data) const
     { colr->depend (depend_data); }
 #endif
@@ -2395,7 +2395,7 @@ struct COLR
     mutable hb_atomic_t<hb_colr_scratch_t *> cached_scratch;
   };
 
-#ifdef HB_DEPEND_API
+#ifndef HB_NO_SUBSET_DEPEND
   void depend (hb_depend_data_t *depend_data) const
   {
     // v0
