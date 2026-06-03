@@ -1640,6 +1640,73 @@ hb_ot_layout_lookups_substitute_closure (hb_face_t      *face,
     }
   } while (iteration_count++ <= HB_CLOSURE_MAX_STAGES &&
 	   glyphs_length != glyphs->get_population ());
+
+  /* If the iteration cap was hit and the set was still growing, complete
+   * the closure using the depend graph.  The depend dispatch processes
+   * each lookup once and records all edges, so transitive closure over
+   * those edges is guaranteed to terminate without an iteration cap. */
+  if (iteration_count > HB_CLOSURE_MAX_STAGES &&
+      glyphs_length != glyphs->get_population ())
+  {
+    unsigned num_glyphs = face->get_num_glyphs ();
+    unsigned num_lookups = gsub.get_lookup_count ();
+
+    hb_depend_data_t data;
+    if (unlikely (!data.glyph_dependencies.resize_exact (num_glyphs)))
+      return;
+
+    hb_depend_data_builder_t builder (data);
+    if (unlikely (!builder.lookup_features.resize (num_lookups)))
+      return;
+
+    hb_set_t active_lookups;
+    if (lookups)
+      active_lookups.set (*lookups);
+    else
+      active_lookups.add_range (0, num_lookups - 1);
+
+    /* Tag active lookups so add_gsub_lookup produces edges. */
+    for (auto i : active_lookups)
+      builder.lookup_features[i].add (0);
+
+    hb_set_t all_glyphs;
+    all_glyphs.add_range (0, num_glyphs - 1);
+
+    OT::hb_depend_context_t dc (&builder, face, &all_glyphs);
+    dc.set_recurse_func (OT::Layout::GSUB_impl::SubstLookup::depend_glyphs_recurse_func);
+
+    for (auto i : active_lookups)
+    {
+      dc.lookup_index = i;
+      dc.lookups_seen.clear ();
+      dc.lookups_seen.add (i);
+      gsub.get_lookup (i).depend (&dc);
+    }
+
+    /* Follow edges transitively from the current glyph set. */
+    hb_set_t to_process (*glyphs);
+    while (!to_process.is_empty ())
+    {
+      hb_set_t frontier;
+      for (auto gid : to_process)
+      {
+        unsigned count = data.get_glyph_entry_count (gid);
+        for (unsigned j = 0; j < count; j++)
+        {
+          hb_tag_t tt, lt;
+          hb_codepoint_t dep, ls, cs;
+          uint8_t fl;
+          data.get_glyph_entry (gid, j, &tt, &dep, &lt, &ls, &cs, &fl);
+          if (!glyphs->has (dep))
+          {
+            glyphs->add (dep);
+            frontier.add (dep);
+          }
+        }
+      }
+      to_process = std::move (frontier);
+    }
+  }
 }
 
 /*
